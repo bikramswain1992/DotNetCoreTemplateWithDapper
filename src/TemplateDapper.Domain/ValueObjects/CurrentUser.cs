@@ -2,7 +2,7 @@
 
 public sealed class CurrentUser
 {
-    public int Id { get; init; }
+    public Guid Id { get; init; }
     public string Email { get; init; } = default!;
     public string Name { get; init; } = default!;
     public string Role { get; init; } = default!;

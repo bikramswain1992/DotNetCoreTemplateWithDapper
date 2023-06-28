@@ -7,8 +7,8 @@ namespace TemplateDapper.Infrastructure.Repository;
 
 public class GenericRepository<TEntity> : IGenericRepository<TEntity> where TEntity : class
 {
-    private readonly IDbConnection _dbConnection;
-    private readonly ILogger<GenericRepository<TEntity>> _logger;
+    protected readonly IDbConnection _dbConnection;
+    protected readonly ILogger<GenericRepository<TEntity>> _logger;
 
     public GenericRepository(IDbConnection dbConnection, ILogger<GenericRepository<TEntity>> logger)
     {
@@ -16,7 +16,7 @@ public class GenericRepository<TEntity> : IGenericRepository<TEntity> where TEnt
         _logger = logger;
     }
 
-    public async Task<TEntity> GetByIdAsync(int id, CancellationToken cancellationToken)
+    public async Task<TEntity> GetByIdAsync(Guid id, CancellationToken cancellationToken)
     {
         if (!cancellationToken.IsCancellationRequested)
         {
@@ -65,7 +65,7 @@ public class GenericRepository<TEntity> : IGenericRepository<TEntity> where TEnt
                 var columns = GetColumns<TEntity>();
                 var stringOfColumns = string.Join(", ", columns);
                 var stringOfParameters = string.Join(", ", columns.Select(e => "@" + e));
-                var query = $"insert into {typeof(TEntity).Name.ToLower()} ({stringOfColumns}) output inserted.Id values ({stringOfParameters})";
+                var query = $"insert into {typeof(TEntity).Name.ToLower()} ({stringOfColumns}) values ({stringOfParameters})";
 
                 var result = dbTransaction == default ?
                     await _dbConnection.ExecuteScalarAsync<int>(query, request)
@@ -87,7 +87,7 @@ public class GenericRepository<TEntity> : IGenericRepository<TEntity> where TEnt
             try
             {
                 var columns = GetColumns<TEntity>();
-                var stringColumnParameters = string.Join(", ", columns.Select(x => $"{x}=@{x}"));
+                var stringColumnParameters = string.Join(", ", columns.Where(x => x != "Id").Select(x => $"{x}=@{x}"));
                 var query = $"update {typeof(TEntity).Name.ToLower()} set {stringColumnParameters} where Id = @Id";
 
                 var result = dbTransaction == default ?
@@ -103,7 +103,7 @@ public class GenericRepository<TEntity> : IGenericRepository<TEntity> where TEnt
         return -1;
     }
 
-    public async Task<int> DeleteAsync(int id, CancellationToken cancellationToken, IDbTransaction dbTransaction = default!)
+    public async Task<int> DeleteAsync(Guid id, CancellationToken cancellationToken, IDbTransaction dbTransaction = default!)
     {
         if (!cancellationToken.IsCancellationRequested)
         {
@@ -128,7 +128,6 @@ public class GenericRepository<TEntity> : IGenericRepository<TEntity> where TEnt
     {
         return typeof(T)
                 .GetProperties()
-                .Where(e => e.Name != "Id")
                 .Select(e => e.Name);
     }
 }

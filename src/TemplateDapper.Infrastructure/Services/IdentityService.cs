@@ -65,7 +65,7 @@ public class IdentityService : IIdentityService
 
         var currentUser = new CurrentUser()
         {
-            Id = Convert.ToInt32(claims["id"]),
+            Id = new Guid(claims["id"]),
             Email = claims["email"],
             Name = claims["name"],
             Role = claims["role"]

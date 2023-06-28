@@ -17,11 +17,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\" />
-    <Folder Include="Middlewares\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\TemplateDapper.Infrastructure\TemplateDapper.Infrastructure.csproj" />
   </ItemGroup>
 
